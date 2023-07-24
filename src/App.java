@@ -1,3 +1,4 @@
+import java.io.File;
 import java.util.Scanner;
 
 public class App {
@@ -7,5 +8,6 @@ public class App {
             System.out.print("Введите ключ шифрования --> ");
             password = input.nextLine();
         }
+        Scheta.decryptFile(new File("video.mp4"), password);
     }
 }
