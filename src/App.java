@@ -8,6 +8,6 @@ public class App {
             System.out.print("Введите ключ шифрования --> ");
             password = input.nextLine();
         }
-        Scheta.decryptFile(new File("video.mp4"), password);
+        Scheta.decryptFile(new File("video.mp4"), 2048, password);
     }
 }

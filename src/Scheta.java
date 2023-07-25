@@ -19,7 +19,7 @@ public class Scheta {
         return res;
     }
 
-    private static Stream<Byte> baseCrypt(boolean encrypt, InputStream input, String code) throws IOException  {
+    private static Stream<Byte> baseCrypt(boolean encrypt, InputStream input, String code, int buffer_size) throws IOException  {
         final int[] key = new int[code.length()];
         for (int i=0; i<code.length(); i++) {
             key[i] = (int)(code.charAt(i));
@@ -28,57 +28,59 @@ public class Scheta {
         ArrayList<Byte> NEW_CONTENT = new ArrayList<Byte>();
 
         int Lcount = 0;
+        byte[] buffer = new byte[buffer_size];
+        int avail;
 
-        int b = input.read();
-        while (b!=-1) {
-            NEW_CONTENT.add((byte) fitInRange(b, key[Lcount], encrypt));
-            Lcount++;
-            if (Lcount==key.length) {Lcount=0;}
-            b = input.read();
+        while ( (avail = input.read(buffer))!=-1 ) {
+            for (int i=0; i<avail; i++) {
+                NEW_CONTENT.add((byte) fitInRange(buffer[i], key[Lcount], encrypt));
+                Lcount++;
+                if (Lcount==key.length) {Lcount=0;}
+            }
         }
 
         return NEW_CONTENT.stream();
 
     }
 
-    public static Stream<Byte> encryptStream(InputStream input, String code) {
+    public static Stream<Byte> encryptStream(InputStream input, int buffer_size, String code) {
         try {
-            return baseCrypt(true, input, code);
+            return baseCrypt(true, input, code, buffer_size);
         } catch (IOException e) {e.printStackTrace();}
         return null;
     }
 
-    public static Stream<Byte> decryptStream(InputStream input, String code) {
+    public static Stream<Byte> decryptStream(InputStream input, int buffer_size, String code) {
         try {
-            return baseCrypt(false, input, code);
+            return baseCrypt(false, input, code, buffer_size);
         } catch (IOException e) {e.printStackTrace();}
         return null;
     }
 
-    public static Stream<Byte> encryptFileContent(File file, String code) {
+    public static Stream<Byte> encryptFileContent(File file, int buffer_size, String code) {
         try {
             try (FileInputStream f = new FileInputStream(file)) {
-                return baseCrypt(true, f, code);
+                return baseCrypt(true, f, code, buffer_size);
             }
         } catch (IOException e) {e.printStackTrace();}
         return null;
     }
 
-    public static Stream<Byte> decryptFileContent(File file, String code) {
+    public static Stream<Byte> decryptFileContent(File file, int buffer_size, String code) {
         try {
             try (FileInputStream f = new FileInputStream(file)) {
-                return baseCrypt(false, f, code);
+                return baseCrypt(false, f, code, buffer_size);
             }
         } catch (IOException e) {e.printStackTrace();}
         return null;
     }
 
-    public static void encryptFile(File file, String code) {
+    public static void encryptFile(File file, int buffer_size, String code) {
         try {
             // Чтение
             final Stream<Byte> encryptedStream;
             try (FileInputStream f = new FileInputStream(file)) {
-                encryptedStream = baseCrypt(true, f, code);
+                encryptedStream = baseCrypt(true, f, code, buffer_size);
             }
             // Запись
             try (FileOutputStream f = new FileOutputStream(file)) {
@@ -92,12 +94,12 @@ public class Scheta {
         } catch (IOException e) {e.printStackTrace();}
     }
 
-    public static void decryptFile(File file, String code) {
+    public static void decryptFile(File file, int buffer_size, String code) {
         try {
             // Чтение
             final Stream<Byte> encryptedStream;
             try (FileInputStream f = new FileInputStream(file)) {
-                encryptedStream = baseCrypt(false, f, code);
+                encryptedStream = baseCrypt(false, f, code, buffer_size);
             }
             // Запись
             try (FileOutputStream f = new FileOutputStream(file)) {
