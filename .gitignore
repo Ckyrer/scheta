@@ -1,6 +1,3 @@
-*.jar
-*.webp
-*.png
-*.jpeg
-*.jpg
-*.mp4
+bin
+.vscode
+.gitignore
